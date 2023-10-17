@@ -1,0 +1,19 @@
+[Unit]
+Description=Kafka Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+ExecStop=/opt/kafka/bin/kafka-server-stop.sh
+Restart=always
+User=kafka
+Group=kafka
+Environment="LOG_DIR=/var/log/kafka"
+Environment="GC_LOG_ENABLED=true"
+Environment="KAFKA_HEAP_OPTS=-Xmx1G -Xms1G"
+Environment="KAFKA_JVM_PERFORMANCE_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35"
+WorkingDirectory=/opt/kafka
+
+[Install]
+WantedBy=multi-user.target

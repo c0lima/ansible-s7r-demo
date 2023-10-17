@@ -1,0 +1,71 @@
+- name: Descargar Kafka
+  get_url:
+    url: "https://downloads.apache.org/kafka/3.6.0/kafka_2.12-3.6.0.tgz"
+    dest: "/tmp/kafka.tgz"
+
+- name: Descomprimir Kafka
+  unarchive:
+    src: "/tmp/kafka.tgz"
+    dest: "/opt/"
+    remote_src: yes
+
+- name: Crear enlace simbólico para facilitar futuras actualizaciones
+  file:
+    src: "/opt/kafka_2.12-3.6.0"
+    dest: "/opt/kafka"
+    state: link
+
+- name: Añadir grupo para Kafka
+  group:
+    name: kafka
+    system: yes
+    state: present
+
+- name: Añadir usuario para Kafka y asignarlo al grupo
+  user:
+    name: kafka
+    group: kafka
+    system: yes
+    state: present
+     
+
+- name: Crear directorio de datos para Kafka
+  file:
+    path: /var/lib/kafka
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Configurar Kafka
+  template:
+    src: "server.properties.j2"
+    dest: "/opt/kafka/config/server.properties"
+
+- name: Configurar Kafka como servicio systemd
+  template:
+    src: "kafka.service.j2"
+    dest: "/etc/systemd/system/kafka.service"
+  notify: Reiniciar Kafka
+
+- name: Crear directorio de logs para Kafka
+  file:
+    path: /var/log/kafka
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Habilitar y arrancar el servicio de Kafka
+  systemd:
+    name: kafka
+    enabled: yes
+    state: started
+  
+- name: Crear tópico elastic-test
+  command:
+    cmd: "/opt/kafka/bin/kafka-topics.sh --create --topic elastic-testt --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1"
+    creates: "/var/lib/kafka/elastic-testt-0"
+  become: yes
+  become_user: kafka
+

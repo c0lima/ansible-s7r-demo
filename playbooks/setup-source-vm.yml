@@ -1,0 +1,7 @@
+---
+- name: Configurar VM Source en Azure
+  hosts: vm-source
+  become: yes
+  
+  roles:
+    - kafka
