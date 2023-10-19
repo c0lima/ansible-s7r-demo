@@ -29,14 +29,6 @@
     state: present
      
 
-- name: Crear directorio de datos para Kafka
-  file:
-    path: /var/lib/kafka
-    state: directory
-    owner: kafka
-    group: kafka
-    mode: '0755'
-
 - name: Configurar Kafka
   template:
     src: "server.properties.j2"
@@ -55,6 +47,21 @@
     owner: kafka
     group: kafka
     mode: '0755'
+
+- name: Generar Cluster ID usando kafka-storage.sh
+  shell: "/opt/kafka/bin/kafka-storage.sh random-uuid"
+  register: cluster_id
+
+- name: Mostrar el Cluster ID generado
+  debug:
+    var: cluster_id.stdout
+
+- name: Formatear el directorio de Kafka
+  command:
+    cmd: "/opt/kafka/bin/kafka-storage.sh format -t {{ cluster_id.stdout }} -c /opt/kafka/config/server.properties"
+    creates: "/var/lib/kafka/meta.properties"
+  become: yes
+  become_user: kafka     
 
 - name: Habilitar y arrancar el servicio de Kafka
   systemd:
