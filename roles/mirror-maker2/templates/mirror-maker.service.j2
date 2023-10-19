@@ -1,0 +1,13 @@
+[Unit]
+Description=Kafka MirrorMaker Service
+Documentation=https://kafka.apache.org/documentation/
+After=network.target
+
+[Service]
+ExecStart=/opt/kafka/bin/connect-mirror-maker.sh /opt/kafka/config/kafka-to-eh-connect-mirror-maker.properties
+Restart=always
+User=kafka
+Group=kafka
+
+[Install]
+WantedBy=multi-user.target

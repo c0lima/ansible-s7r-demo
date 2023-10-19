@@ -1,0 +1,6 @@
+- name: Reiniciar MirrorMaker
+  systemd:
+    name: mirror-maker
+    state: restarted
+    enabled: yes
+

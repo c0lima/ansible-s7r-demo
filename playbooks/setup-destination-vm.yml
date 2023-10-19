@@ -1,0 +1,8 @@
+---
+- name: Configurar VM Destination en Azure
+  hosts: vm-destination
+  become: yes
+  
+  roles:
+    - mirror-maker2
+

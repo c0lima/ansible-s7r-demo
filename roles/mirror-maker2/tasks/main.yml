@@ -1,0 +1,80 @@
+- name: Descargar Kafka
+  get_url:
+    url: "https://downloads.apache.org/kafka/3.6.0/kafka_2.12-3.6.0.tgz"
+    dest: "/tmp/kafka.tgz"
+
+- name: Descomprimir Kafka
+  unarchive:
+    src: "/tmp/kafka.tgz"
+    dest: "/opt/"
+    remote_src: yes
+
+- name: Crear enlace simbólico para facilitar futuras actualizaciones
+  file:
+    src: "/opt/kafka_2.12-3.6.0"
+    dest: "/opt/kafka"
+    state: link
+
+- name: Añadir grupo para Kafka
+  group:
+    name: kafka
+    system: yes
+    state: present
+
+- name: Añadir usuario para Kafka y asignarlo al grupo
+  user:
+    name: kafka
+    group: kafka
+    system: yes
+    state: present
+     
+
+- name: Crear directorio de datos para Kafka
+  file:
+    path: /var/lib/kafka
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Generar Cluster ID usando kafka-storage.sh
+  shell: "/opt/kafka/bin/kafka-storage.sh random-uuid"
+  register: cluster_id
+
+- name: Mostrar el Cluster ID generado
+  debug:
+    var: cluster_id.stdout
+
+- name: Formatear el directorio de Kafka
+  command:
+    cmd: "/opt/kafka/bin/kafka-storage.sh format -t {{ cluster_id.stdout }} -c /opt/kafka/config/server.properties"
+    creates: "/var/lib/kafka/meta.properties"
+  become: yes
+  become_user: kafka
+          
+- name: Configurar Kafka
+  template:
+    src: "server.properties.j2"
+    dest: "/opt/kafka/config/server.properties"
+
+- name: Crear directorio de logs para Kafka
+  file:
+    path: /var/log/kafka
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Configurar Kafka MirrorMaker para Event Hub
+  template:
+    src: "kafka-to-eh-connect-mirror-maker.properties.j2"
+    dest: "/opt/kafka/config/kafka-to-eh-connect-mirror-maker.properties"
+  vars_files:
+    - roles/mirror-maker2/vars/secrets.yml
+
+- name: Configurar Kafka MirrorMaker como servicio systemd
+  template:
+    src: "mirror-maker.service.j2"
+    dest: "/etc/systemd/system/mirror-maker.service"
+  notify: Reiniciar MirrorMaker
+
