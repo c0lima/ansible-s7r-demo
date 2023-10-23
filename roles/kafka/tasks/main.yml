@@ -40,6 +40,9 @@
     dest: "/etc/systemd/system/kafka.service"
   notify: Reiniciar Kafka
 
+- name: Recargar systemd
+  command: systemctl daemon-reload
+
 - name: Crear directorio de logs para Kafka
   file:
     path: /var/log/kafka
@@ -71,8 +74,8 @@
   
 - name: Crear tópico elastic-test
   command:
-    cmd: "/opt/kafka/bin/kafka-topics.sh --create --topic elastic-testt --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1"
-    creates: "/var/lib/kafka/elastic-testt-0"
+    cmd: "/opt/kafka/bin/kafka-topics.sh --create --topic elastic-test --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1"
+    creates: "/var/lib/kafka/elastic-test-0"
   become: yes
   become_user: kafka
 

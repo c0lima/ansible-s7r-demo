@@ -1,6 +1,6 @@
-- name: Reiniciar MirrorMaker
+---
+- name: Reiniciar Kafka
   systemd:
-    name: mirror-maker
+    name: kafka
     state: restarted
-    enabled: yes
 

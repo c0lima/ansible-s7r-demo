@@ -3,6 +3,10 @@
     url: "https://downloads.apache.org/kafka/3.6.0/kafka_2.12-3.6.0.tgz"
     dest: "/tmp/kafka.tgz"
 
+- name: Print secret (for debugging)
+  debug:
+    var: vault_destination_sasl_jaas_config
+
 - name: Descomprimir Kafka
   unarchive:
     src: "/tmp/kafka.tgz"
@@ -14,6 +18,14 @@
     src: "/opt/kafka_2.12-3.6.0"
     dest: "/opt/kafka"
     state: link
+
+- name: Asegurarse de que todo /opt/kafka pertenezca al usuario y grupo kafka
+  file:
+    path: /opt/kafka
+    state: directory
+    recurse: yes
+    owner: kafka
+    group: kafka
 
 - name: Añadir grupo para Kafka
   group:
@@ -37,6 +49,28 @@
     group: kafka
     mode: '0755'
 
+- name: Crear directorio de logs para Kafka en /opt/kafka
+  file:
+    path: /opt/kafka/logs
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Configurar Kafka
+  template:
+    src: "server.properties.j2"
+    dest: "/opt/kafka/config/server.properties"
+
+- name: Configurar Kafka como servicio systemd
+  template:
+    src: "kafka.service.j2"
+    dest: "/etc/systemd/system/kafka.service"
+  notify: Reiniciar Kafka
+
+- name: Recargar systemd
+  command: systemctl daemon-reload
+
 - name: Generar Cluster ID usando kafka-storage.sh
   shell: "/opt/kafka/bin/kafka-storage.sh random-uuid"
   register: cluster_id
@@ -52,10 +86,11 @@
   become: yes
   become_user: kafka
           
-- name: Configurar Kafka
-  template:
-    src: "server.properties.j2"
-    dest: "/opt/kafka/config/server.properties"
+- name: Habilitar y arrancar el servicio de Kafka
+  systemd:
+    name: kafka
+    enabled: yes
+    state: started
 
 - name: Crear directorio de logs para Kafka
   file:
@@ -69,8 +104,6 @@
   template:
     src: "kafka-to-eh-connect-mirror-maker.properties.j2"
     dest: "/opt/kafka/config/kafka-to-eh-connect-mirror-maker.properties"
-  vars_files:
-    - roles/mirror-maker2/vars/secrets.yml
 
 - name: Configurar Kafka MirrorMaker como servicio systemd
   template:
