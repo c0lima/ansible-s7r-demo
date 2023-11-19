@@ -1,0 +1,36 @@
+- name: Instalar Node.js y NPM
+  include_tasks: install_nodejs.yml
+
+- name: Crear directorio para la aplicación de logger
+  file:
+    path: /opt/logger_app
+    state: directory
+
+- name: Desplegar el script de la aplicación de logger
+  template:
+    src: logger_app.js.j2
+    dest: /opt/logger_app/logger_app.js
+    mode: 0755
+
+- name: Instalar cliente de Elasticsearch para Node.js
+  npm:
+    name: '@elastic/elasticsearch'
+    path: /opt/logger_app
+    global: no
+    state: present
+
+- name: Desplegar el servicio de la aplicación de logger
+  template:
+    src: logger_app.service.j2
+    dest: /etc/systemd/system/logger_app.service
+
+- name: Instalar dependencias de Node.js
+  npm:
+    path: /opt/logger_app
+
+- name: Habilitar y arrancar el servicio de la aplicación de logger
+  systemd:
+    name: logger_app
+    enabled: yes
+    state: started
+    daemon_reload: yes

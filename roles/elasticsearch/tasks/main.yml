@@ -1,0 +1,21 @@
+- name: Descargar e instalar el paquete RPM de Elasticsearch
+  yum:
+    name: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.0-x86_64.rpm
+    state: present
+
+- name: Configurar Elasticsearch
+  copy:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    content: |
+      network.host: 0.0.0.0
+      http.port: 9200
+      discovery.type: single-node
+      xpack.security.enabled: false
+
+- name: Habilitar y arrancar el servicio de Elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started
+    daemon_reload: yes
+

@@ -4,4 +4,6 @@
   become: yes
   
   roles:
-    - kafka
+    #- kafka ## LISTO
+    #- logger-app-2
+    - elasticsearch

@@ -1,0 +1,14 @@
+[Unit]
+Description=Logger Application
+
+[Service]
+ExecStart=/usr/bin/node /opt/logger_app/logger_app.js
+Restart=always
+User=nobody
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/opt/logger_app
+
+[Install]
+WantedBy=multi-user.target
+
