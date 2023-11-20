@@ -2,12 +2,12 @@
 - name: Configurar VM Destination en Azure
   hosts: vm-destination
   become: yes
-  vars:
-    home_dir: "{{ lookup('env','HOME') }}"
-    secrets_path: "{{ home_dir }}/ansible-s7r-demo/roles/mirror-maker2/vars/secrets.yml"
-  vars_files:
-    - "{{ secrets_path }}"
+    #  vars:
+    #    home_dir: "{{ lookup('env','HOME') }}"
+    # secrets_path: "{{ home_dir }}/ansible-s7r-demo/roles/mirror-maker2/vars/secrets.yml"
+    # vars_files:
+    # - "{{ secrets_path }}"
 
   roles:
-    - mirror-maker2
-
+    # - mirror-maker2
+    - logstash

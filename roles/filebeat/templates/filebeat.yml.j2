@@ -1,0 +1,10 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  ignore_older: 0
+  paths:
+    - /var/log/logger_app_3/app.log
+
+output.logstash:
+  hosts: ["10.11.2.43:5044"]
+

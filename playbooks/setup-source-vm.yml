@@ -6,4 +6,6 @@
   roles:
     #- kafka ## LISTO
     #- logger-app-2
-    - elasticsearch
+    #- elasticsearch
+    #- logger-app-3
+    - filebeat

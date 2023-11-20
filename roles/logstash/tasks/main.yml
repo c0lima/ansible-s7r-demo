@@ -1,0 +1,18 @@
+- name: Descargar e instalar el paquete RPM de Elasticsearch
+  yum:
+    name: https://artifacts.elastic.co/downloads/logstash/logstash-8.11.1-x86_64.rpm
+    state: present
+
+- name: Desplegar la configuración de Logstash
+  template:
+    src: logstash.conf.j2
+    dest: /etc/logstash/conf.d/logstash.conf
+
+- name: Habilitar y arrancar el servicio de Logstash
+  systemd:
+    name: logstash
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+

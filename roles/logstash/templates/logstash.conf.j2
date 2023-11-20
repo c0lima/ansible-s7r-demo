@@ -1,0 +1,23 @@
+input {
+  beats {
+    port => 5044
+  }
+  elasticsearch {
+    hosts => ["10.11.2.42:9200"]
+    index => "logs*"
+    query => '{ "query": { "match_all": {} } }'
+    schedule => "* * * * *"
+}
+}
+
+output {
+  kafka {
+    bootstrap_servers => "eventhubkafka001.servicebus.windows.net:9093"
+    sasl_mechanism => "PLAIN"
+    security_protocol => "SASL_SSL"
+    sasl_jaas_config => '{EH-CONNECTION-STRING}'
+    client_id => "logstash"
+    topic_id => "testing"
+  }
+}
+

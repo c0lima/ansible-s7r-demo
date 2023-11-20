@@ -1,0 +1,12 @@
+[Unit]
+Description=Logger APP (3)
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /opt/logger_app_3/logger_app_3.sh
+Restart=always
+User=nobody
+
+[Install]
+WantedBy=multi-user.target
+
